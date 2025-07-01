@@ -141,7 +141,7 @@
         const staffNight = {
             julie:     { name: "Julie", off: [2,3,8,13,14,15,17,20,21,22,26], time: '17:00', team: 'noite', class: 'bg-blue-100 text-blue-800' },
             thamires:  { name: "Thamires", off: [4,5,6,12,19,23,24,29,30], time: '17:00', team: 'noite', class: 'bg-blue-100 text-blue-800' },
-            esteffano: { name: "Esteffano", off: [4,10,15,16,17,21,22,26,27,28], time: '16:00', team: 'noite_apoio', class: 'bg-amber-100 text-amber-800' },
+            esteffano: { name: "Esteffano", off: [3, 4, 7, 10, 15, 16, 17, 18, 21, 22, 25, 26, 27, 28], time: '16:00', team: 'noite_apoio', class: 'bg-amber-100 text-amber-800' },
             natanael:  { name: "Natanael", off: [3,8,9,10,15,19,20,21,27], time: '17:00', team: 'noite_apoio', class: 'bg-amber-100 text-amber-800' },
             alex:      { name: "Alex", off: [1,6,12,13,18,24,25,30,31], time: '17:00', team: 'noite_apoio', class: 'bg-amber-100 text-amber-800' },
             paulo:     { name: "Paulo Ricardo", off: [5,6,7,10,11,18,22,23,28,29], time: '16:00', team: 'noite_apoio', class: 'bg-amber-100 text-amber-800' },
@@ -258,6 +258,11 @@
                 const workingNightPrincipals = ['julie', 'thamires'].filter(p => isWorking(p, day));
                 let workingNightSupport = Object.keys(staffNight).filter(p => staffNight[p].team === 'noite_apoio' && isWorking(p, day));
                 let availablePNTStaff = Object.keys(staffNight).filter(p => staffNight[p].team === 'pnt' && isWorking(p, day));
+
+                if (workingNightSupport.length > 1) {
+                    const rotation = day % workingNightSupport.length;
+                    workingNightSupport = [...workingNightSupport.slice(rotation), ...workingNightSupport.slice(0, rotation)];
+                }
 
                 let hangarPersonId = null, pierPersonId = null;
                 if (workingNightPrincipals.length === 2) {
