@@ -263,30 +263,51 @@
                     const rotation = day % workingNightSupport.length;
                     workingNightSupport = [...workingNightSupport.slice(rotation), ...workingNightSupport.slice(0, rotation)];
                 }
+                
+                let hangarPersonId = null, pierPersonId = null, rendHangarId = null, rendPierId = null;
 
-                let hangarPersonId = null, pierPersonId = null;
-                if (workingNightPrincipals.length === 2) {
+                // Manual Overrides
+                const manualOverrides = {
+                    1: { hangar: 'thamires', pier: 'julie' },
+                    11: { rendPier: 'ramos' },
+                    15: { rendPier: 'claudio' },
+                    17: { rendPier: 'ramos' },
+                    20: { rendPier: 'ramos' },
+                    24: { rendPier: 'ramos' },
+                    25: { rendPier: 'claudio' }
+                };
+
+                const override = manualOverrides[day];
+                if (override) {
+                    if (override.hangar && isWorking(override.hangar, day)) hangarPersonId = override.hangar;
+                    if (override.pier && isWorking(override.pier, day)) pierPersonId = override.pier;
+                    if (override.rendPier && isWorking(override.rendPier, day)) rendPierId = override.rendPier;
+                }
+
+                // Automatic assignments for non-overridden roles
+                if (workingNightPrincipals.length === 2 && !hangarPersonId && !pierPersonId) {
                     pierPersonId = nightAlternator === 0 ? 'thamires' : 'julie';
                     hangarPersonId = nightAlternator === 0 ? 'julie' : 'thamires';
                     nightAlternator = 1 - nightAlternator;
                 } else if (workingNightPrincipals.length === 1) {
-                    hangarPersonId = workingNightPrincipals[0];
-                    pierPersonId = workingNightSupport.shift(); // Support takes the pier
-                } else {
-                    hangarPersonId = workingNightSupport.shift(); // Support takes hangar
-                    pierPersonId = workingNightSupport.shift(); // Support takes pier
+                    if (!hangarPersonId && !pierPersonId) hangarPersonId = workingNightPrincipals[0];
                 }
+
+                if (!hangarPersonId) hangarPersonId = workingNightSupport.shift();
+                if (!pierPersonId) pierPersonId = workingNightSupport.shift();
                 
                 if (availablePNTStaff.length > 1) {
                     const rotation = day % availablePNTStaff.length;
                     availablePNTStaff = [...availablePNTStaff.slice(rotation), ...availablePNTStaff.slice(0, rotation)];
                 }
-                const rendHangarId = availablePNTStaff.shift();
-                const rendPierId = availablePNTStaff.shift();
+                if (!rendHangarId) rendHangarId = availablePNTStaff.find(p => p !== rendPierId);
+                if (!rendPierId) rendPierId = availablePNTStaff.find(p => p !== rendHangarId);
+
 
                 const hangarHTML = hangarPersonId ? createTag(`${staffNight[hangarPersonId].name} (${staffNight[hangarPersonId].time})`, staffNight[hangarPersonId].class) : '<span class="text-gray-400">-</span>';
-                const rendHangarHTML = rendHangarId ? createTag(`${staffNight[rendHangarId].name} (${staffNight[rendHangarId].time})`, greenClass) : '<span class="text-gray-400">-</span>';
                 const pierHTML = pierPersonId ? createTag(`${staffNight[pierPersonId].name} (${staffNight[pierPersonId].time})`, staffNight[pierPersonId].class) : '<span class="text-gray-400">-</span>';
+                
+                const rendHangarHTML = rendHangarId ? createTag(`${staffNight[rendHangarId].name} (${staffNight[rendHangarId].time})`, greenClass) : '<span class="text-gray-400">-</span>';
                 const rendPierHTML = rendPierId ? createTag(`${staffNight[rendPierId].name} (${staffNight[rendPierId].time})`, greenClass) : '<span class="text-gray-400">-</span>';
                 
                 let availableHTML = workingNightSupport.map(p => createTag(`${staffNight[p].name} (${staffNight[p].time})`, amberClass)).join(' ');
@@ -308,27 +329,4 @@
                         <td class="p-2">${rendHangarHTML}</td>
                         <td class="p-2">${pierHTML}</td>
                         <td class="p-2">${rendPierHTML}</td>
-                        <td class="p-2 flex flex-wrap items-center">${availableHTML}</td>
-                    </tr>`;
-            }
-        }
-
-        // --- EVENT LISTENERS ---
-        btnManha.addEventListener('click', () => {
-            btnManha.classList.add('active');
-            btnNoite.classList.remove('active');
-            generateMorningSchedule();
-        });
-
-        btnNoite.addEventListener('click', () => {
-            btnNoite.classList.add('active');
-            btnManha.classList.remove('active');
-            generateNightSchedule();
-        });
-
-        // --- INITIAL LOAD ---
-        btnManha.click();
-    </script>
-</body>
-</html>
-
+                
